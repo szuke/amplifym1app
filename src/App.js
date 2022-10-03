@@ -13,17 +13,36 @@ import {
   withAuthenticator,
 } from '@aws-amplify/ui-react';
 import { listNotes } from "./graphql/queries";
+import { listEntries } from "./graphql/queries";
 import {
   createNote as createNoteMutation,
   deleteNote as deleteNoteMutation,
+  createEntry as createEntryMutation,
+  deleteEntry as deleteEntryMutation,
 } from "./graphql/mutations";
 
 const App = ({ signOut }) => {
   const [notes, setNotes] = useState([]);
+  const [entries, setEntries] = useState([]);
 
   useEffect(() => {
     fetchNotes();
   }, []);
+
+  useEffect(() => {
+    fetchEntries();
+  }, []);
+
+  async function fetchEntries() {
+    const apiData = await API.graphql({ query: listEntries });
+    const entriesFromAPI = apiData.data.listEntries.items;
+    await Promise.all(
+      entriesFromAPI.map(async (entry) => {
+        return entry;
+      })
+    );
+    setEntries(entriesFromAPI);
+  }
 
   async function fetchNotes() {
     const apiData = await API.graphql({ query: listNotes });
@@ -56,6 +75,33 @@ const App = ({ signOut }) => {
     });
     fetchNotes();
     event.target.reset();
+  }
+
+  async function createEntry(event) {
+    event.preventDefault();
+    const form = new FormData(event.target);
+    const data = {
+      date: form.get("date"),
+      cust: form.get("cust"),
+      hours: form.get("hours"),
+      comments: form.get("comments"),
+    };
+    await API.graphql({
+      query: createEntryMutation,
+      variables: { input: data },
+    });    
+    fetchEntries();
+    event.target.reset();
+  }
+
+  async function deleteEntry({ id, cust }) {
+    const newEntries = entries.filter((entry) => entry.id !== id);
+    setEntries(newEntries);
+    await Storage.remove(cust);
+    await API.graphql({
+      query: deleteEntryMutation,
+      variables: { input: { id } },
+    });
   }
 
   async function deleteNote({ id, name }) {
@@ -109,7 +155,59 @@ const App = ({ signOut }) => {
           height: '3px',
         }}
       />
-      <Heading level={2}>Current Notes</Heading>
+      <View as="form" margin="3rem 0" onSubmit={createEntry}>
+        <Flex direction="row" justifyContent="center">
+          <TextField
+            name="cust"
+            placeholder="Customer Name"
+            label="Customer Name"
+            labelHidden
+            variation="quiet"
+            required
+          />
+          <TextField
+            name="date"
+            placeholder="Date of service"
+            label="Date"
+            labelHidden
+            variation="quiet"
+            required
+          />
+          <TextField
+            name="hours"
+            placeholder="Hours"
+            label="Hours"
+            labelHidden
+            variation="quiet"
+            required
+          />
+          <Button type="submit" variation="primary">
+            Create Entry
+          </Button>
+        </Flex>
+      </View>
+
+      <Heading level={2}>Current Entries</Heading>
+      <View margin="3rem 0">
+      {entries.map((entry) => (
+        <Flex
+          key={entry.id || entry.cust}
+          direction="row"
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Text as="strong" fontWeight={700}>
+            {entry.date}
+          </Text>
+          <Text as="span">{entry.cust}</Text>
+          <Button variation="link" onClick={() => deleteEntry(entry)}>
+            Delete entry
+          </Button>
+        </Flex>
+      ))}
+      </View>
+
+      <Heading level={3}>Current Notes</Heading>
       <View margin="3rem 0">
       {notes.map((note) => (
         <Flex
