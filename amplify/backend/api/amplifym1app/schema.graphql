@@ -8,3 +8,13 @@ type Note @model @auth(rules: [ { allow: public } ] ){
   description: String
   image: String
 }
+
+type Entry @model @auth(rules: [ { allow: public } ] ){
+  id: ID!
+  date: String!
+  cust: String!
+  hours: String!
+  comments: String!
+  createdAt: AWSDateTime!
+}
+
