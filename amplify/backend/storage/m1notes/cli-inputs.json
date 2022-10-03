@@ -1,0 +1,14 @@
+{
+  "resourceName": "m1notes",
+  "policyUUID": "1b33a1ae",
+  "bucketName": "amplifym1app740f0fe451e840cba6bf98cf3ac49f75",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}
