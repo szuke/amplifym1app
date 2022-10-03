@@ -100,6 +100,15 @@ const App = ({ signOut }) => {
           </Button>
         </Flex>
       </View>
+            {/* 👇️ colored horizontal line */}
+            <hr
+        style={{
+          background: 'lime',
+          color: 'lime',
+          borderColor: 'lime',
+          height: '3px',
+        }}
+      />
       <Heading level={2}>Current Notes</Heading>
       <View margin="3rem 0">
       {notes.map((note) => (
